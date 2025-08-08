@@ -21,6 +21,9 @@
   - Do not use `process.cwd()` as your base path for temporary files. It is just sloppy. Use `<pkg>/test/fixtures` and add an empty file `<pkg>/test/fixtures/.gitkeep` to avoid having to  constantly ensure the directory exists
   - If you cannot solve why a test keeps failing, skip it don't delete it and let me know what tests you skipped at the end
   - Avoid import mocking if you can
+  - Prefer test files to be named after the code files they test (e.g. `src/foo.js` would have `test/foo.test.js`). If feel it is warranted to create dedicated test files for a given scenario, prefix that file with the code file it is most closely related to (e.g. the "complex" scenario for `src/foo.js` would go in `test/foo.complex.test.js`).
+  - Prefer clarity of intentions from test file names over the burden of potentially refactoring. (e.g. if the tests for the "Bar" class in `src/foo.js` are becoming a significant portion of `test/foo.test.js` then breakout "Bar" into `src/bar.js` so that the tests can live in `src/bar.test.js`)
+     - If you see opportunities for this that were not asked please call them out to me first before proceeding.
 - When using `async` and `await`
   - If you are calling an async function from another async function prefer `return await otherAsyncFunction()` instead of `return otherAsyncFunction()`
 - When writing documentation
@@ -37,4 +40,6 @@
   - Prefer `undici` for making network calls
 - When working with `git`
   - If a file is currently managed by `git` and you need to rename that file, prefer using `git mv` to `mv` to keep the commit history clean
-
+- When selecting default values
+  - Avoid common default port values (`3000`, `8080`, `9000`)
+  - Prefer default port numbers with mathematical significance (`1618`, `16181`, `27519`, `3141`, `314159`, etc.)
