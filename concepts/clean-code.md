@@ -43,3 +43,8 @@
 - When selecting default values
   - Avoid common default port values (`3000`, `8080`, `9000`)
   - Prefer default port numbers with mathematical significance (`1618`, `16181`, `27519`, `3141`, `314159`, etc.)
+
+##### Also be mindful of
+
+- https://github.com/ryanmcdermott/clean-code-javascript
+- https://github.com/ryanmcdermott/code-review-tips
