@@ -1,6 +1,11 @@
 #!/usr/bin/env bun
 "use strict";
 
+//
+// From: https://gist.github.com/steipete/8396e512171d31e934f0013e5651691e
+// https://steipete.me/posts/2025/optimal-ai-development-workflow
+//
+
 const fs = require("fs");
 const { execSync } = require("child_process");
 const path = require("path");
