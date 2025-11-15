@@ -1,0 +1,15 @@
+%% Diagram 2: Since Parameter
+
+flowchart TB
+  S1["seq:1000"] --> S2["seq:1001"]
+  S2 --> S3["seq:1002<br/>deleted:true"]
+  S3 --> S4["seq:1003"]
+  S4 --> S5["seq:1004"]
+
+  S3 --> CP["checkpoint:1002"]
+  CP --> API1["GET /_changes?since=1002"]
+  API1 --> S4
+
+  S5 --> FAIL["disconnect"]
+  FAIL --> API2["GET /_changes?since=1004"]
+  API2 --> S5

@@ -1,0 +1,12 @@
+%% Diagram 4: Tombstones
+
+flowchart LR
+  LIVE["left-pad"] -->|"unpublish"| DEAD["_deleted:true"]
+
+  NORMAL["_id:doc<br/>_deleted:true"]
+
+  TOMBSTONE["_id:left-pad<br/>_deleted:true<br/>time.unpublished:{...}<br/>_attachments.readme:{...}"]
+
+  DEAD --> TOMBSTONE
+
+  TOMBSTONE --> CE["seq:999999<br/>id:left-pad<br/>deleted:true"]

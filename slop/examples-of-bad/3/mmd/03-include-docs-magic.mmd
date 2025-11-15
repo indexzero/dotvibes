@@ -1,0 +1,18 @@
+%% Diagram 3: include_docs Comparison
+
+flowchart LR
+  subgraph False["include_docs=false"]
+    A1["GET /_changes?since=1000"]
+    A2["seq:1001<br/>id:express<br/>rev:2-abc"]
+    A3["GET /express"]
+    A4["doc:{...}"]
+    A1 --> A2
+    A2 --> A3
+    A3 --> A4
+  end
+
+  subgraph True["include_docs=true"]
+    B1["GET /_changes?since=1000&include_docs=true"]
+    B2["seq:1001<br/>id:express<br/>doc:{...}"]
+    B1 --> B2
+  end

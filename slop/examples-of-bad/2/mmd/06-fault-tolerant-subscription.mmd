@@ -1,0 +1,58 @@
+%% Diagram 6: Fault-Tolerant Subscription Flow
+
+flowchart TB
+  subgraph Main["Main Loop"]
+    START["Load checkpoint<br/>since = last_seq"]
+    FETCH["GET /_changes?since={since}"]
+    PROCESS["Process changes"]
+    SAVE["Save checkpoint<br/>since = new_seq"]
+    MORE{{"More changes?"}}
+
+    START --> FETCH
+    FETCH --> PROCESS
+    PROCESS --> SAVE
+    SAVE --> MORE
+    MORE -->|"Yes"| FETCH
+    MORE -->|"No"| WAIT["Wait/poll"]
+    WAIT --> FETCH
+  end
+
+  subgraph Failures["Failure Points"]
+    F_NET["Network Error"]
+    F_503["503 Service Unavailable"]
+    F_CRASH["Process Crash"]
+  end
+
+  subgraph Recovery["Recovery Logic"]
+    BACKOFF["Exponential backoff<br/>delay = min(2^retries * 1s, 5min)"]
+    RELOAD["Reload checkpoint<br/>from disk"]
+    VALIDATE["Validate seq still valid"]
+  end
+
+  FETCH -.->|"Connection reset"| F_NET
+  FETCH -.->|"503"| F_503
+  PROCESS -.->|"Crash"| F_CRASH
+
+  F_NET --> BACKOFF
+  F_503 --> BACKOFF
+  F_CRASH --> RELOAD
+
+  BACKOFF --> FETCH
+  RELOAD --> VALIDATE
+  VALIDATE --> START
+
+  subgraph Checkpoint["Checkpoint Format"]
+    CP["{<br/>  seq: '12345-g1AAA...',<br/>  timestamp: '2024-01-15T10:00:00Z',<br/>  doc_count: 45678<br/>}"]
+  end
+
+  SAVE --> CP
+
+  classDef main fill:#d4edda,stroke:#28a745,stroke-width:2px;
+  classDef failure fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
+  classDef recovery fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+  classDef checkpoint fill:#e3f2fd,stroke:#2196f3,stroke-width:2px;
+
+  class START,FETCH,PROCESS,SAVE main;
+  class F_NET,F_503,F_CRASH failure;
+  class BACKOFF,RELOAD,VALIDATE recovery;
+  class CP checkpoint;

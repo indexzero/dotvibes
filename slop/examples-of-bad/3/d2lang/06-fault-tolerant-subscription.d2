@@ -1,0 +1,466 @@
+# Diagram 6: Fault-Tolerant Subscription - Building Resilient Followers
+# Like a bookmark - you never lose your place, even if the book falls
+# Author: As explained by Laurie Voss to a new engineer
+
+direction: down
+
+# The Happy Path
+happy: "✅ The Happy Path" {
+  style: {
+    fill: "#e8f5e9"
+    stroke: "#28a745"
+    stroke-width: 2
+  }
+
+  start: |md
+    🏁 **Start**
+    `since = load_checkpoint()`
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+    shape: circle
+  }
+
+  fetch: |md
+    📡 **Fetch Changes**
+    `GET /_changes?since={since}`
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+    shape: hexagon
+  }
+
+  process: |md
+    ⚙️ **Process Batch**
+    Handle each change
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  save: |md
+    💾 **Save Checkpoint**
+    `since = last_seq`
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  more: |md
+    More changes?
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+    shape: diamond
+  }
+
+  wait: |md
+    😴 **Wait/Long-poll**
+    for new changes
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  start -> fetch
+  fetch -> process
+  process -> save
+  save -> more
+  more -> fetch: "Yes"
+  more -> wait: "No"
+  wait -> fetch
+}
+
+# Failure Scenarios
+failures: "🚨 Things That Go Wrong" {
+  style: {
+    fill: "#ffebee"
+    stroke: "#dc3545"
+    stroke-width: 2
+  }
+
+  network: |md
+    ⚡ **Network Error**
+    "Connection reset"
+  | {
+    style: {
+      fill: "#f8d7da"
+      stroke: "#dc3545"
+    }
+  }
+
+  crash: |md
+    💥 **Process Crash**
+    "Segmentation fault"
+  | {
+    style: {
+      fill: "#f8d7da"
+      stroke: "#dc3545"
+    }
+  }
+
+  couch503: |md
+    🔄 **CouchDB Restart**
+    "503 Service Unavailable"
+  | {
+    style: {
+      fill: "#f8d7da"
+      stroke: "#dc3545"
+    }
+  }
+
+  parse: |md
+    🐛 **Processing Error**
+    "JSON parse failed"
+  | {
+    style: {
+      fill: "#f8d7da"
+      stroke: "#dc3545"
+    }
+  }
+
+  disk: |md
+    💾 **Disk Full**
+    "No space left"
+  | {
+    style: {
+      fill: "#f8d7da"
+      stroke: "#dc3545"
+    }
+  }
+}
+
+# Recovery Mechanisms
+recovery: "🛡️ Recovery Strategies" {
+  style: {
+    fill: "#fffbf0"
+    stroke: "#ffc107"
+    stroke-width: 2
+  }
+
+  net_recovery: |md
+    **Network Error Recovery:**
+    • Exponential backoff
+    • Start: 1s, Max: 5min
+    • Add jitter (±30%)
+    • Resume from checkpoint
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  crash_recovery: |md
+    **Process Crash Recovery:**
+    • Load last checkpoint
+    • Validate checkpoint integrity
+    • Resume from safe point
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  couch_recovery: |md
+    **CouchDB 503 Recovery:**
+    • Wait with backoff
+    • Monitor /up endpoint
+    • Resume when healthy
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  parse_recovery: |md
+    **Processing Error Recovery:**
+    • Log problematic change
+    • Skip if non-critical
+    • Alert if critical
+    • Continue from next
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  disk_recovery: |md
+    **Disk Full Recovery:**
+    • Alert immediately
+    • Pause processing
+    • Resume after cleanup
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+}
+
+# Connect failures to recovery
+happy.fetch -> failures.network: "Error" {
+  style.stroke-dash: 3
+  style.stroke: "#dc3545"
+}
+happy.process -> failures.crash: "Crash" {
+  style.stroke-dash: 3
+  style.stroke: "#dc3545"
+}
+happy.fetch -> failures.couch503: "503" {
+  style.stroke-dash: 3
+  style.stroke: "#dc3545"
+}
+happy.process -> failures.parse: "Error" {
+  style.stroke-dash: 3
+  style.stroke: "#dc3545"
+}
+happy.save -> failures.disk: "Error" {
+  style.stroke-dash: 3
+  style.stroke: "#dc3545"
+}
+
+failures.network -> recovery.net_recovery
+failures.crash -> recovery.crash_recovery
+failures.couch503 -> recovery.couch_recovery
+failures.parse -> recovery.parse_recovery
+failures.disk -> recovery.disk_recovery
+
+recovery.net_recovery -> happy.start: "Retry" {
+  style.stroke: "#28a745"
+}
+recovery.crash_recovery -> happy.start: "Restart" {
+  style.stroke: "#28a745"
+}
+recovery.couch_recovery -> happy.wait: "Wait" {
+  style.stroke: "#28a745"
+}
+recovery.parse_recovery -> happy.fetch: "Skip" {
+  style.stroke: "#28a745"
+}
+recovery.disk_recovery -> happy.wait: "Pause" {
+  style.stroke: "#28a745"
+}
+
+# Production Code Pattern
+code: "💻 Production Code Pattern" {
+  style: {
+    fill: "#f5f5f5"
+    stroke: "#757575"
+    stroke-width: 1
+  }
+
+  pattern: |md
+    ```javascript
+    class ResilientFollower {
+      async follow() {
+        let since = await loadCheckpoint();
+        let retries = 0;
+
+        while (true) {
+          try {
+            const changes = await fetchChanges(since);
+
+            for (const change of changes.results) {
+              await processChange(change);
+              since = change.seq;
+            }
+
+            await saveCheckpoint(since);
+            retries = 0;  // Reset on success
+
+          } catch (error) {
+            retries++;
+            const delay = Math.min(
+              1000 * Math.pow(2, retries),
+              300000  // Max 5 minutes
+            );
+
+            console.error(`Error: ${error.message}`);
+            console.log(`Retry ${retries} in ${delay}ms`);
+
+            await sleep(delay);
+          }
+        }
+      }
+    }
+    ```
+  | {
+    style.font-size: 12
+  }
+}
+
+recovery -> code
+
+# Checkpoint Management
+checkpoint: "📍 Checkpoint Best Practices" {
+  style: {
+    fill: "#e3f2fd"
+    stroke: "#2196f3"
+    stroke-width: 2
+  }
+
+  atomic: |md
+    **Atomic Writes:**
+    ```javascript
+    // Write to temp file first
+    writeFileSync('.checkpoint.tmp', data);
+    // Then atomic rename
+    renameSync('.checkpoint.tmp', '.checkpoint');
+    ```
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+
+  metadata: |md
+    **Include Metadata:**
+    ```json
+    {
+      "seq": "12345-g1AAA...",
+      "processed_at": "2024-01-15T10:00:00Z",
+      "doc_count": 45678,
+      "error_count": 3,
+      "hash": "sha256:abc123..."
+    }
+    ```
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+
+  validation: |md
+    **Validation on Load:**
+    • Verify hash matches
+    • Check seq is still valid
+    • Rewind if corrupted
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+
+  atomic -> metadata -> validation
+}
+
+code -> checkpoint
+
+# Guarantees
+guarantees: "🎯 What This Guarantees" {
+  style: {
+    fill: "#e1f5e1"
+    stroke: "#43a047"
+    stroke-width: 2
+  }
+
+  atleastonce: |md
+    ✅ **At-least-once delivery**
+    May process twice, never miss
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  resumable: |md
+    ✅ **Resumable from any point**
+    Even after weeks offline
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  healing: |md
+    ✅ **Self-healing**
+    Recovers from all transient failures
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  idempotent: |md
+    ⚠️ **Requires idempotent processing**
+    Same change processed twice = same result
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+}
+
+checkpoint -> guarantees
+
+# Real npm Numbers
+npmstats: "📊 npm Registry Scale" {
+  style: {
+    fill: "#e8f5e9"
+    stroke: "#4caf50"
+    stroke-width: 2
+  }
+
+  operations: |md
+    **Daily Operations:**
+    • 10,000+ changes/hour peak
+    • 99.95% uptime required
+    • <1s change propagation
+  | {
+    style: {
+      fill: "#e8f5e9"
+      stroke: "#4caf50"
+    }
+  }
+
+  failures: |md
+    **Failure Frequency:**
+    • Network blips: Daily
+    • 503 errors: Weekly
+    • Process crashes: Monthly
+  | {
+    style: {
+      fill: "#e8f5e9"
+      stroke: "#4caf50"
+    }
+  }
+
+  recovery_times: |md
+    **Recovery Times:**
+    • Network: 1-30 seconds
+    • 503: 30s-5 minutes
+    • Crash: <10 seconds
+  | {
+    style: {
+      fill: "#e8f5e9"
+      stroke: "#4caf50"
+    }
+  }
+
+  operations -> failures -> recovery_times
+}
+
+guarantees -> npmstats

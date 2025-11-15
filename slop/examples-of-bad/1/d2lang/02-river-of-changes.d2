@@ -1,0 +1,285 @@
+# Diagram 2: The River of Changes
+# _changes feed as continuous stream - like a Twitter timeline, you can scroll back to where you left off
+# Author: As explained by Laurie Voss to a new engineer
+
+direction: down
+
+# The Change Stream
+stream: "🌊 The _changes Feed Timeline" {
+  style: {
+    fill: "#e8f5e9"
+    stroke: "#4caf50"
+    stroke-width: 2
+  }
+
+  s1: |md
+    seq:1000
+    📦 lodash@4.17.20
+    ⏰ 10:00:00
+  | {
+    style: {
+      fill: "#e1f5e1"
+      stroke: "#43a047"
+      stroke-width: 2
+    }
+  }
+
+  s2: |md
+    seq:1001
+    📦 express@4.18.1
+    ⏰ 10:00:15
+  | {
+    style: {
+      fill: "#e1f5e1"
+      stroke: "#43a047"
+      stroke-width: 2
+    }
+  }
+
+  s3: |md
+    seq:1002
+    💀 left-pad@1.3.0
+    ❌ **DELETED**
+    ⏰ 10:00:30
+  | {
+    style: {
+      fill: "#f8d7da"
+      stroke: "#dc3545"
+      stroke-width: 3
+      font-size: 14
+    }
+  }
+
+  s4: |md
+    seq:1003
+    📦 react@18.2.0
+    ⏰ 10:00:45
+  | {
+    style: {
+      fill: "#e1f5e1"
+      stroke: "#43a047"
+      stroke-width: 2
+    }
+  }
+
+  s5: |md
+    seq:1004
+    📦 vue@3.3.4
+    ⏰ 10:01:00
+  | {
+    style: {
+      fill: "#e1f5e1"
+      stroke: "#43a047"
+      stroke-width: 2
+    }
+  }
+
+  s6: |md
+    seq:1005
+    📦 webpack@5.89.0
+    ⏰ 10:01:15
+  | {
+    style: {
+      fill: "#e1f5e1"
+      stroke: "#43a047"
+      stroke-width: 2
+    }
+  }
+
+  s7: |md
+    seq:...
+    ∞ continues forever
+  | {
+    style: {
+      fill: "#e8f5e9"
+      stroke: "#4caf50"
+      stroke-width: 1
+      font-style: italic
+    }
+  }
+
+  s1 -> s2: ""
+  s2 -> s3: ""
+  s3 -> s4: ""
+  s4 -> s5: ""
+  s5 -> s6: ""
+  s6 -> s7: ""
+}
+
+# Client Subscription
+client: "👀 Your Subscription" {
+  style: {
+    fill: "#fffbf0"
+    stroke: "#ff9800"
+    stroke-width: 2
+  }
+
+  checkpoint: |md
+    📍 **Last checkpoint:**
+    seq:1002
+    *"I was here when*
+    *left-pad was deleted"*
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+      stroke-width: 3
+      font-size: 14
+    }
+  }
+
+  resume: |md
+    🔄 **Resume Command:**
+    `GET /_changes?since=1002`
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+      stroke-width: 2
+    }
+  }
+
+  receive: |md
+    📥 **Receive:**
+    Changes from seq:1003 onward
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+      stroke-width: 2
+    }
+  }
+
+  checkpoint -> resume: ""
+  resume -> receive: ""
+}
+
+# Connections between stream and client
+stream.s3 -> client.checkpoint: "💾 Save checkpoint" {
+  style: {
+    stroke-dash: 3
+    stroke: "#ffc107"
+    stroke-width: 2
+  }
+}
+
+client.resume -> stream.s4: "📡 Fetch" {
+  style: {
+    stroke: "#2196f3"
+    stroke-width: 2
+  }
+}
+
+stream.s4 -> client.receive: "Stream from here" {
+  style: {
+    stroke-dash: 3
+    stroke: "#4caf50"
+    stroke-width: 2
+  }
+}
+
+# Key Features
+features: "✨ Key Features" {
+  style: {
+    fill: "#f0f4ff"
+    stroke: "#2196f3"
+    stroke-width: 2
+  }
+
+  f1: |md
+    📝 **Strictly Ordered**
+    Every change has unique seq
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+
+  f2: |md
+    🔄 **Resumable**
+    Start from any point
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+
+  f3: |md
+    💀 **Deletions Visible**
+    Unpublishes appear as changes
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+
+  f4: |md
+    🎯 **Real-time or Polling**
+    continuous=true or false
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+}
+
+# What Happens on Disconnect
+disconnect: "⚡ Connection Lost?" {
+  style: {
+    fill: "#ffebee"
+    stroke: "#f44336"
+    stroke-width: 2
+  }
+
+  d1: |md
+    ❌ Network fails at seq:1004
+  | {
+    style: {
+      fill: "#ffebee"
+      stroke: "#f44336"
+    }
+  }
+
+  d2: |md
+    ✅ No problem!
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  d3: |md
+    🔄 **Reconnect with:**
+    `?since=1004`
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  d4: |md
+    📊 Continue from exact spot
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  d1 -> d2: ""
+  d2 -> d3: ""
+  d3 -> d4: ""
+}
+
+client.receive -> disconnect.d1: "" {
+  style: {
+    stroke: "#f44336"
+    stroke-dash: 3
+  }
+}

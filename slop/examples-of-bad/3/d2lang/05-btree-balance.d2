@@ -1,0 +1,411 @@
+# Diagram 5: B-Tree Balance - Order Matters
+# Like a library - books added in order vs randomly stuffed on shelves
+# Author: As explained by Laurie Voss to a new engineer
+
+direction: down
+
+# Introduction
+intro: "📚 Think of a B-Tree Like a Library" {
+  style: {
+    fill: "#f0f4ff"
+    stroke: "#2196f3"
+    stroke-width: 2
+  }
+
+  explanation: |md
+    Each 'shelf' (node) holds sorted packages
+    Finding a book is fast when organized
+    Chaos makes everything slow
+  | {
+    style.font-size: 14
+  }
+}
+
+# Container for both tree types
+trees: "" {
+  style.fill: transparent
+  style.stroke: none
+
+  # Sequential Writes (Good)
+  good: "😊 Sequential Writes (Balanced Tree)" {
+    style: {
+      fill: "#e8f5e9"
+      stroke: "#28a745"
+      stroke-width: 2
+    }
+
+    root: |md
+      📚 **Root Node**
+      (Directory)
+    | {
+      style: {
+        fill: "#d4edda"
+        stroke: "#28a745"
+        stroke-width: 2
+      }
+    }
+
+    nodeA: |md
+      📗 **Node A**
+      Packages: 1-1000
+      Depth: 1
+    | {
+      style: {
+        fill: "#e3f2fd"
+        stroke: "#2196f3"
+      }
+    }
+
+    nodeB: |md
+      📘 **Node B**
+      Packages: 1001-2000
+      Depth: 1
+    | {
+      style: {
+        fill: "#e3f2fd"
+        stroke: "#2196f3"
+      }
+    }
+
+    nodeC: |md
+      📙 **Node C**
+      Packages: 2001-3000
+      Depth: 1
+    | {
+      style: {
+        fill: "#e3f2fd"
+        stroke: "#2196f3"
+      }
+    }
+
+    leafA: |md
+      babel
+      browserify
+      chai
+      ...
+    | {
+      style: {
+        fill: "#f5f5f5"
+        stroke: "#9e9e9e"
+      }
+    }
+
+    leafB: |md
+      express
+      fastify
+      gulp
+      ...
+    | {
+      style: {
+        fill: "#f5f5f5"
+        stroke: "#9e9e9e"
+      }
+    }
+
+    leafC: |md
+      jest
+      lodash
+      mocha
+      ...
+    | {
+      style: {
+        fill: "#f5f5f5"
+        stroke: "#9e9e9e"
+      }
+    }
+
+    root -> nodeA
+    root -> nodeB
+    root -> nodeC
+    nodeA -> leafA
+    nodeB -> leafB
+    nodeC -> leafC
+
+    stats: |md
+      ✅ **Balanced Tree Stats:**
+      • Depth: 2 levels
+      • Lookups: 2 hops max
+      • Storage: Optimal
+      • Cache hits: 94%
+    | {
+      style: {
+        fill: "#d4edda"
+        stroke: "#28a745"
+        stroke-width: 2
+        font-size: 14
+      }
+    }
+  }
+
+  # Random Writes (Bad)
+  bad: "😰 Random Writes (Unbalanced Tree)" {
+    style: {
+      fill: "#ffebee"
+      stroke: "#dc3545"
+      stroke-width: 2
+    }
+
+    root: |md
+      📚 **Root Node**
+      (Chaos Directory)
+    | {
+      style: {
+        fill: "#f8d7da"
+        stroke: "#dc3545"
+        stroke-width: 2
+      }
+    }
+
+    nodeX: |md
+      📕 **Node X**
+      react, axios, vue
+      Depth: varies
+    | {
+      style: {
+        fill: "#ffcdd2"
+        stroke: "#f44336"
+      }
+    }
+
+    nodeY: |md
+      📓 **Node Y**
+      express, zod, babel
+      Depth: varies
+    | {
+      style: {
+        fill: "#ffcdd2"
+        stroke: "#f44336"
+      }
+    }
+
+    nodeZ: |md
+      📔 **Node Z**
+      lodash, next, jest
+      Depth: varies
+    | {
+      style: {
+        fill: "#ffcdd2"
+        stroke: "#f44336"
+      }
+    }
+
+    frag1: |md
+      🔀 Fragmented
+      Data
+    | {
+      style: {
+        fill: "#f5f5f5"
+        stroke: "#9e9e9e"
+      }
+    }
+
+    frag2: |md
+      🔀 More
+      Fragmentation
+    | {
+      style: {
+        fill: "#f5f5f5"
+        stroke: "#9e9e9e"
+      }
+    }
+
+    frag3: |md
+      🔀 Even More
+      Fragmentation
+    | {
+      style: {
+        fill: "#f5f5f5"
+        stroke: "#9e9e9e"
+      }
+    }
+
+    deep: |md
+      ⚠️ Deep
+      Nesting
+    | {
+      style: {
+        fill: "#ffebee"
+        stroke: "#f44336"
+      }
+    }
+
+    root -> nodeX
+    root -> nodeY
+    root -> nodeZ
+    nodeX -> frag1
+    nodeY -> frag2
+    nodeZ -> frag3
+    frag1 -> deep
+
+    stats: |md
+      ❌ **Unbalanced Tree Stats:**
+      • Depth: 5+ levels
+      • Lookups: 5+ hops
+      • Storage: Fragmented
+      • Cache hits: 72%
+    | {
+      style: {
+        fill: "#f8d7da"
+        stroke: "#dc3545"
+        stroke-width: 2
+        font-size: 14
+      }
+    }
+  }
+}
+
+intro -> trees
+
+# npm Registry Reality
+reality: "📊 npm Registry: The Real Challenge" {
+  style: {
+    fill: "#e8f5e9"
+    stroke: "#4caf50"
+    stroke-width: 2
+  }
+
+  scale: |md
+    **450M+ changes**
+    across
+    **2.5M+ packages**
+  | {
+    style: {
+      fill: "#e8f5e9"
+      stroke: "#4caf50"
+      font-size: 16
+    }
+  }
+
+  pattern: |md
+    📈 **Update Pattern:**
+    • Popular packages update frequently
+    • Random across entire keyspace
+    • No sequential pattern
+  | {
+    style: {
+      fill: "#e8f5e9"
+      stroke: "#4caf50"
+    }
+  }
+
+  example: |md
+    🎲 **Example Sequence:**
+    seq:1000 → update 'react'
+    seq:1001 → update 'left-pad'
+    seq:1002 → update '@types/node'
+    = Random tree insertions!
+  | {
+    style: {
+      fill: "#e8f5e9"
+      stroke: "#4caf50"
+    }
+  }
+
+  scale -> pattern -> example
+}
+
+trees -> reality
+
+# Performance Impact
+performance: "⚡ Real Performance Impact" {
+  style: {
+    fill: "#fff3cd"
+    stroke: "#ffc107"
+    stroke-width: 2
+  }
+
+  primary: |md
+    **Primary Registry (12 years old)**
+    • Built organically over time
+    • Tree somewhat optimized
+    • 100GB+ database size
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  replica: |md
+    **New Replica from _changes**
+    • Built from random order
+    • Highly fragmented tree
+    • Same 100GB+ but slower!
+  | {
+    style: {
+      fill: "#ffebee"
+      stroke: "#f44336"
+    }
+  }
+
+  measured: |md
+    📊 **Measured Difference:**
+    • Read latency: +40%
+    • Write latency: +60%
+    • Compaction time: 3x longer
+    • Cache efficiency: -22%
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+      font-size: 14
+    }
+  }
+
+  primary -> replica -> measured
+}
+
+reality -> performance
+
+# Solution
+solution: "💡 The Solution" {
+  style: {
+    fill: "#e1f5e1"
+    stroke: "#43a047"
+    stroke-width: 2
+  }
+
+  header: |md
+    **Best Practice for Replication:**
+  | {
+    style.font-size: 16
+  }
+
+  step1: |md
+    1️⃣ **Initial Sync:**
+    Copy database file directly
+    `rsync primary.couch replica.couch`
+    Preserves tree structure
+  | {
+    style: {
+      fill: "#e1f5e1"
+      stroke: "#43a047"
+    }
+  }
+
+  step2: |md
+    2️⃣ **Incremental Updates:**
+    Use _changes feed for new data
+    Minimal tree disruption
+  | {
+    style: {
+      fill: "#e1f5e1"
+      stroke: "#43a047"
+    }
+  }
+
+  step3: |md
+    3️⃣ **Periodic Compaction:**
+    Rebuild tree occasionally
+    Restores balance
+  | {
+    style: {
+      fill: "#e1f5e1"
+      stroke: "#43a047"
+    }
+  }
+
+  header -> step1 -> step2 -> step3
+}
+
+performance -> solution

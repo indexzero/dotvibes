@@ -1,0 +1,252 @@
+# Diagram 3: include_docs Magic
+# Like email notifications - preview only vs full message included
+# Author: As explained by Laurie Voss to a new engineer
+
+direction: down
+
+# The Choice
+choice: "🤔 The include_docs Decision" {
+  style: {
+    fill: "#f0f4ff"
+    stroke: "#2196f3"
+    stroke-width: 2
+  }
+
+  question: |md
+    Do you want the full document
+    with every change?
+  | {
+    style.font-size: 16
+  }
+}
+
+# Without include_docs (Default)
+without: "🔍 include_docs=false (Default)" {
+  style: {
+    fill: "#fffbf0"
+    stroke: "#ffc107"
+    stroke-width: 2
+  }
+
+  change_event: |md
+    📨 **Change Event**
+    ```json
+    {
+      "seq": "1001",
+      "id": "express",
+      "rev": "2-abc"
+    }
+    ```
+    Size: ~200 bytes
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  need_doc: |md
+    ❓ Need full doc?
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  separate_req: |md
+    🌐 **Separate Request**
+    `GET /express`
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  full_doc: |md
+    📄 **Full Document**
+    Size: ~50KB - 2MB
+    (for popular packages)
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  change_event -> need_doc
+  need_doc -> separate_req: "YES"
+  separate_req -> full_doc
+}
+
+# With include_docs
+with: "🎁 include_docs=true" {
+  style: {
+    fill: "#e8f5e9"
+    stroke: "#28a745"
+    stroke-width: 2
+  }
+
+  complete_event: |md
+    📦 **Change Event + Document**
+    ```json
+    {
+      "seq": "1001",
+      "id": "express",
+      "rev": "2-abc",
+      "doc": {
+        "name": "express",
+        "versions": {...},
+        // 50KB+ of data
+      }
+    }
+    ```
+    Size: 50KB - 2MB
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  no_extra: |md
+    ✅ **Already have everything!**
+    No extra request needed
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+
+  complete_event -> no_extra
+}
+
+# Connections from choice
+choice.question -> without
+choice.question -> with
+
+# Performance Comparison
+perf: "⚡ Performance for 1000 Changes" {
+  style: {
+    fill: "#fafafa"
+    stroke: "#9e9e9e"
+    stroke-width: 2
+  }
+
+  without_perf: |md
+    ❌ **include_docs=false**
+    1 request for changes: 200KB
+    + 1000 doc requests
+    = **1001 HTTP calls**
+    ⏱️ ~2 seconds total
+  | {
+    style: {
+      fill: "#ffebee"
+      stroke: "#f44336"
+      stroke-width: 2
+    }
+  }
+
+  with_perf: |md
+    ✅ **include_docs=true**
+    1 request for everything: 50MB
+    = **1 HTTP call**
+    ⏱️ ~1.3 seconds total
+    BUT uses more memory!
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+      stroke-width: 2
+    }
+  }
+}
+
+without -> perf.without_perf
+with -> perf.with_perf
+
+# Real npm Registry Example
+npm: "📊 Real npm Registry Numbers" {
+  style: {
+    fill: "#e3f2fd"
+    stroke: "#2196f3"
+    stroke-width: 2
+  }
+
+  large_pkg: |md
+    🏢 **Popular package '@types/node':**
+    Document size: >10MB
+    Contains 300+ versions
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+
+  memory: |md
+    💾 **Memory usage with include_docs=true:**
+    100 changes × 10MB = 1GB RAM!
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+    }
+  }
+
+  best: |md
+    🎯 **Best Practice:**
+    Use include_docs=false for monitoring
+    Use include_docs=true for full replication
+  | {
+    style: {
+      fill: "#e3f2fd"
+      stroke: "#2196f3"
+      font-size: 14
+    }
+  }
+
+  large_pkg -> memory
+  memory -> best
+}
+
+perf -> npm
+
+# Decision Matrix
+decision: "📋 Decision Matrix" {
+  style: {
+    fill: "#f5f5f5"
+    stroke: "#757575"
+    stroke-width: 1
+  }
+
+  use_false: |md
+    **Use include_docs=false when:**
+    ✓ Only monitoring for changes
+    ✓ Memory constrained
+    ✓ Selective processing
+    ✓ High-frequency polling
+  | {
+    style: {
+      fill: "#fff3cd"
+      stroke: "#ffc107"
+    }
+  }
+
+  use_true: |md
+    **Use include_docs=true when:**
+    ✓ Full replication needed
+    ✓ Batch processing all changes
+    ✓ Network latency is high
+    ✓ Processing everything anyway
+  | {
+    style: {
+      fill: "#d4edda"
+      stroke: "#28a745"
+    }
+  }
+}
+
+npm -> decision

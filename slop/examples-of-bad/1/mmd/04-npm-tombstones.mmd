@@ -1,0 +1,98 @@
+%% Diagram 4: npm Tombstones - When Packages Die
+%% Like a gravestone - marks where something was, with inscription
+%% Author: As explained by Laurie Voss to a new engineer
+
+flowchart TB
+  %% ---- The Life and Death of left-pad ----
+  subgraph Lifecycle["🎭 The Life & Death of left-pad"]
+    L1["📦 <b>left-pad@1.3.0</b><br/>Status: Published<br/>Size: ~5KB<br/>Downloads: 2.5M/month<br/>⏰ March 2016"]
+
+    L2["💥 The Incident<br/>'11 lines of code<br/>broke the internet'"]
+
+    L3["🗑️ npm unpublish<br/>Author removes package"]
+
+    L4["💀 <b>left-pad@1.3.0</b><br/>Status: DELETED<br/>_deleted: true"]
+
+    L1 --> L2
+    L2 --> L3
+    L3 --> L4
+  end
+
+  %% ---- Normal CouchDB Delete vs npm Tombstone ----
+  subgraph Compare["⚖️ Normal Delete vs npm Tombstone"]
+    direction LR
+
+    N1["<b>Normal CouchDB Delete</b><br/><code>{<br/>  '_id': 'some-doc',<br/>  '_deleted': true<br/>}</code><br/>Size: ~100 bytes<br/>Can be compacted away"]
+
+    N2["<b>npm Tombstone</b><br/><code>{<br/>  '_id': 'left-pad',<br/>  '_deleted': true,<br/>  'time': {<br/>    'unpublished': {<br/>      'time': '2016-03-23T16:31:23Z',<br/>      'versions': [...],<br/>      'maintainers': [...]<br/>    }<br/>  },<br/>  '_attachments': {<br/>    'readme': {...}<br/>  }<br/>}</code><br/>Size: 10KB+<br/>Never goes away!"]
+  end
+
+  L4 --> Compare
+
+  %% ---- The Tombstone Document ----
+  subgraph Tombstone["🪦 The Tombstone Document"]
+    T1["<b>What npm Keeps After Death:</b>"]
+
+    T2["📅 <b>Unpublish Metadata</b><br/>• When it was unpublished<br/>• Who unpublished it<br/>• What versions existed"]
+
+    T3["📄 <b>README Content</b><br/>• Documentation remains<br/>• So people know what it was"]
+
+    T4["🏷️ <b>Package Metadata</b><br/>• Name is reserved<br/>• Can't be reused"]
+
+    T1 --> T2
+    T1 --> T3
+    T1 --> T4
+  end
+
+  Compare --> Tombstone
+
+  %% ---- The Change Event ----
+  subgraph ChangeEvent["📨 The Deletion Change Event"]
+    C1["<code>{<br/>  'seq': '999999',<br/>  'id': 'left-pad',<br/>  'deleted': true,<br/>  'changes': [{'rev': '12-xyz'}]<br/>}</code>"]
+
+    C2["⚠️ Note: 'deleted' not '_deleted'<br/>in the change event"]
+  end
+
+  Tombstone --> ChangeEvent
+  C1 --> C2
+
+  %% ---- Why This Matters ----
+  subgraph Impact["⚠️ Why Tombstones Matter"]
+    I1["<b>📏 Size Impact</b><br/>Tombstone: 10KB+<br/>vs Normal delete: 100 bytes<br/>100x larger!"]
+
+    I2["<b>🌲 B-Tree Impact</b><br/>Deleted nodes still consume space<br/>Can't be compacted<br/>Tree stays unbalanced"]
+
+    I3["<b>💾 Replication Impact</b><br/>Every replica carries<br/>all tombstones forever<br/>Disk usage never decreases"]
+
+    I4["<b>🔒 Security/Legal</b><br/>Preserves unpublish history<br/>Prevents name hijacking<br/>Audit trail"]
+  end
+
+  ChangeEvent --> Impact
+
+  %% ---- Real World Example ----
+  subgraph RealWorld["📊 npm Registry Reality"]
+    R1["<b>Current Stats (2024):</b><br/>~2.5M packages total<br/>~100K unpublished packages<br/>= ~1GB of tombstones"]
+
+    R2["<b>Famous Tombstones:</b><br/>• left-pad<br/>• kik<br/>• node-ipc<br/>• colors.js<br/>• faker.js"]
+
+    R3["<b>Lesson:</b><br/>Once published to npm,<br/>it never truly goes away"]
+  end
+
+  Impact --> RealWorld
+
+  %% ---- Styling ----
+  classDef alive      fill:#d4edda,stroke:#28a745,stroke-width:2px;
+  classDef dead       fill:#f8d7da,stroke:#dc3545,stroke-width:3px;
+  classDef tombstone  fill:#ffebee,stroke:#c62828,stroke-width:2px;
+  classDef compare    fill:#f0f4ff,stroke:#2196f3,stroke-width:2px;
+  classDef change     fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+  classDef impact     fill:#ffebee,stroke:#f44336,stroke-width:2px;
+  classDef reality    fill:#e3f2fd,stroke:#2196f3,stroke-width:2px;
+
+  class L1 alive;
+  class L4 dead;
+  class T1,T2,T3,T4 tombstone;
+  class N1,N2 compare;
+  class C1,C2 change;
+  class I1,I2,I3,I4 impact;
+  class R1,R2,R3 reality;

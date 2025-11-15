@@ -1,0 +1,24 @@
+%% Diagram 1: Single Change Event
+
+flowchart LR
+  subgraph Document["Document State"]
+    V1["express@4.18.0<br/>rev: 1-abc123"]
+    V2["express@4.18.1<br/>rev: 2-def456"]
+    V1 -->|"UPDATE"| V2
+  end
+
+  subgraph Change["Change Event"]
+    CE["{<br/>  seq: '1001',<br/>  id: 'express',<br/>  changes: [{rev: '2-def456'}]<br/>}"]
+  end
+
+  V2 -.->|"Generates"| CE
+
+  subgraph Feed["_changes Feed"]
+    CF["GET /registry/_changes"]
+    CE --> CF
+  end
+
+  classDef doc fill:#e1f5e1,stroke:#43a047,stroke-width:2px;
+  classDef change fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+  class V1,V2 doc;
+  class CE,CF change;

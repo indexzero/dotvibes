@@ -1,0 +1,49 @@
+%% Diagram 2: Changes Feed with Since Parameter
+
+flowchart TB
+  subgraph Stream["_changes Feed"]
+    S1["seq:1000 lodash"]
+    S2["seq:1001 express"]
+    S3["seq:1002 left-pad (deleted: true)"]
+    S4["seq:1003 react"]
+    S5["seq:1004 vue"]
+    S6["seq:1005 webpack"]
+    S7["seq:... continues"]
+
+    S1 --> S2
+    S2 --> S3
+    S3 --> S4
+    S4 --> S5
+    S5 --> S6
+    S6 --> S7
+  end
+
+  subgraph Checkpoint["Client Checkpoint"]
+    CP["Last: seq:1002"]
+    API1["GET /_changes?since=1002"]
+    RESP["Returns: seq:1003 onwards"]
+  end
+
+  S3 -.->|"Save"| CP
+  CP --> API1
+  API1 --> S4
+  S4 -.->| RESP
+
+  subgraph Disconnect["Network Failure Recovery"]
+    FAIL["Connection lost at seq:1004"]
+    RETRY["GET /_changes?since=1004"]
+    RESUME["Continues from seq:1005"]
+  end
+
+  S5 -.->|"Failure"| FAIL
+  FAIL --> RETRY
+  RETRY --> S6
+  S6 -.->| RESUME
+
+  classDef normal fill:#e1f5e1,stroke:#43a047,stroke-width:2px;
+  classDef deleted fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
+  classDef api fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+
+  class S1,S2,S4,S5,S6 normal;
+  class S3 deleted;
+  class API1,RETRY api;

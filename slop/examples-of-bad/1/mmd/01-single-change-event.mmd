@@ -1,0 +1,47 @@
+%% Diagram 1: The Single Change Event
+%% What is a change in CouchDB? Think of it like a receipt for every transaction.
+%% Author: As explained by Laurie Voss to a new engineer
+
+flowchart LR
+  %% ---- Package State Transition ----
+  subgraph Timeline["⏱️  Package Timeline"]
+    V1["📦 express@4.18.0<br/>seq: 1000<br/>rev: 1-abc123"]
+    V2["📦 express@4.18.1<br/>seq: 1001<br/>rev: 2-def456"]
+    V1 -->|"🔄 UPDATE"| V2
+  end
+
+  %% ---- Generated Change Event ----
+  subgraph ChangeEvent["📋 Change Event (Your Receipt)"]
+    CE["<b>Change Document</b><br/>{<br/>  'seq': '1001',<br/>  'id': 'express',<br/>  'changes': [<br/>    {'rev': '2-def456'}<br/>  ]<br/>}"]
+  end
+
+  V2 -.->|"✨ Generates"| CE
+
+  %% ---- Key Concepts ----
+  subgraph Concepts["🎓 What This Means"]
+    C1["<b>seq</b>: Unique position in<br/>the change stream<br/>(like a receipt number)"]
+    C2["<b>id</b>: Package that changed<br/>(what you bought)"]
+    C3["<b>rev</b>: Version of the change<br/>(transaction details)"]
+  end
+
+  CE --> C1
+  CE --> C2
+  CE --> C3
+
+  %% ---- Change Types ----
+  subgraph Types["📊 Types of Changes"]
+    T1["🆕 CREATE<br/>New package"]
+    T2["🔄 UPDATE<br/>Version bump"]
+    T3["💀 DELETE<br/>Unpublished"]
+  end
+
+  %% ---- Styling ----
+  classDef package    fill:#e1f5e1,stroke:#43a047,stroke-width:2px;
+  classDef change     fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+  classDef concept    fill:#e3f2fd,stroke:#2196f3,stroke-width:2px;
+  classDef types      fill:#f5f5f5,stroke:#757575,stroke-width:1px;
+
+  class V1,V2 package;
+  class CE change;
+  class C1,C2,C3 concept;
+  class T1,T2,T3 types;
