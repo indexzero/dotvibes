@@ -1,6 +1,0 @@
-%% Diagram 1: Single Change Event
-
-flowchart LR
-  V1["express<br/>rev: 1-abc"] --> V2["express<br/>rev: 2-def"]
-  V2 --> CE["seq: 1001<br/>id: express<br/>rev: 2-def"]
-  CE --> API["GET /_changes"]
