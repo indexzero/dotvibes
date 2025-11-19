@@ -1,38 +1,83 @@
 # GAS Skill - Internal Prompt Templates
 
-These prompts are used by Claude internally when processing security alerts.
+These prompts guide Claude's application of the hermeneutic circle when processing security alerts.
 
-## Alert Analysis Template
+## Hermeneutic Context Gathering Template
 
-When analyzing each alert, use this internal reasoning:
+Before analyzing any alerts, establish the whole:
+
+```
+PROJECT UNDERSTANDING (The Whole):
+
+1. DOMAIN CONTEXT:
+   - Project type: [library/application/tool/service]
+   - Primary purpose: [What does this project do?]
+   - User base: [Who uses this? Internal/external/public?]
+   - Data sensitivity: [What data is handled?]
+
+2. ARCHITECTURAL CONTEXT:
+   - Design patterns observed: [List patterns found]
+   - Security boundaries identified: [Where are trust boundaries?]
+   - Existing security measures: [What protections exist?]
+   - Technical constraints: [Performance/compatibility requirements]
+
+3. OPERATIONAL CONTEXT:
+   - Deployment environment: [Where does this run?]
+   - Threat model: [What threats are relevant?]
+   - Compliance requirements: [Any regulations?]
+   - Risk tolerance: [From SECURITY.md or inferred]
+
+This understanding of the whole will inform how I interpret each part (alert).
+```
+
+## Hermeneutic Alert Analysis Template
+
+When analyzing each alert, apply the hermeneutic circle:
 
 ```
 ALERT: [Type] in [File:Line]
 
-QUESTIONS TO ANSWER:
-1. Is user input involved? [YES/NO]
-   - If YES: What's the input source?
-   - If YES: What validation exists?
+PART → WHOLE MOVEMENT (Understanding the alert in context):
 
-2. Is this code reachable in production? [YES/NO/UNCERTAIN]
-   - If YES: What's the execution path?
-   - If NO: Why not? (dead code, test-only, etc.)
+1. THE PART (Specific Alert):
+   - Vulnerability type: [What is claimed?]
+   - Code pattern: [What specific code triggered this?]
+   - Immediate risk: [What could happen here?]
 
-3. Are there compensating controls? [YES/NO]
-   - If YES: Where? (List specific files:lines)
-   - If YES: Are they sufficient?
+2. CONTEXTUALIZING IN THE WHOLE:
+   - Role in system: [What does this code do in the larger system?]
+   - Architectural fit: [How does this align with project patterns?]
+   - Trust boundaries: [Where does this sit relative to security boundaries?]
+   - Similar patterns: [Where else does this pattern appear?]
 
-4. Will the standard fix work? [YES/NO/NEEDS_MODIFICATION]
-   - If NO: What's the issue?
-   - If NEEDS_MODIFICATION: What changes needed?
+3. WHOLE → PART MOVEMENT (Reinterpreting based on context):
+   - Given project type [X], is this truly vulnerable?
+   - Given operational environment [Y], is this exploitable?
+   - Given existing controls [Z], is this mitigated?
 
-5. Impact of fixing:
-   - Performance: [NONE/MINIMAL/SIGNIFICANT]
-   - Compatibility: [PRESERVED/BREAKING]
-   - Tests affected: [List test files]
+4. HERMENEUTIC SYNTHESIS:
+   - Is user input involved? [YES/NO]
+     * Input source within trust model: [Description]
+     * Validation at boundaries: [Where/How]
 
-DECISION: [FIX/DISMISS/ESCALATE]
-RATIONALE: [One sentence explanation]
+   - Production reachability: [YES/NO/CONDITIONAL]
+     * Execution path: [Trace from entry point]
+     * Conditions required: [What must be true?]
+
+   - Compensating controls: [EXIST/ABSENT/PARTIAL]
+     * Location: [Specific files:lines]
+     * Sufficiency analysis: [Why sufficient/insufficient]
+
+5. EMERGENT UNDERSTANDING:
+   - True risk level: [HIGH/MEDIUM/LOW/NONE]
+   - Fix appropriateness: [NECESSARY/BENEFICIAL/UNNECESSARY/HARMFUL]
+   - System impact of fixing:
+     * Performance: [Analysis based on architecture]
+     * Compatibility: [Analysis based on constraints]
+     * Patterns: [Consistency with project conventions]
+
+DECISION: [FIX/CONTEXTUAL_FIX/DISMISS/ESCALATE]
+RATIONALE: [Synthesis of part-whole understanding]
 ```
 
 ## Fix Verification Template
@@ -287,6 +332,33 @@ SEARCH QUERIES USED:
 - AST: [if applicable]
 ```
 
+## Hermeneutic Decision Framework
+
+When deciding on a fix strategy, apply the circle one final time:
+
+```
+HERMENEUTIC FIX DECISION:
+
+1. PART CONSIDERATION (The specific fix):
+   - Standard fix: [What is typically recommended?]
+   - Technical correctness: [Is the fix technically sound?]
+   - Local impact: [What changes in immediate code?]
+
+2. WHOLE CONSIDERATION (System-wide implications):
+   - Architectural harmony: [Does fix align with patterns?]
+   - Ripple effects: [What else might be affected?]
+   - Operational impact: [How does this affect deployment/performance?]
+   - Maintenance burden: [What future cost does this create?]
+
+3. SYNTHESIS (Emerging from the circle):
+   - If fixing: How to adapt fix to project's whole?
+   - If dismissing: What evidence from whole justifies this?
+   - If escalating: What whole-system question needs answering?
+
+FINAL STRATEGY:
+[Choose based on hermeneutic understanding, not mechanical rules]
+```
+
 ---
 
-These templates ensure consistent, thorough analysis of security alerts while maintaining clear documentation and decision trails.
+These templates ensure Claude applies Heidegger's hermeneutic circle to security analysis, achieving deep understanding through the interplay of parts and whole rather than mechanical rule application.

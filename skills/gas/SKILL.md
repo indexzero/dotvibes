@@ -1,6 +1,10 @@
-# GitHub Advanced Security (GAS) Alert Fixer
-**Skill Version:** 1.0.0
-**Description:** Automatically analyze and fix GitHub Advanced Security alerts with context-aware solutions
+# GitHub Advanced Security (GAS) Alert Fixer: A Hermeneutic Approach
+**Skill Version:** 1.1.0
+**Description:** Apply Heidegger's hermeneutic circle to understand and fix GitHub Advanced Security alerts within their full system context
+
+## Purpose
+
+This skill helps Claude properly address GitHub Advanced Security (GAS) alerts by understanding them within their full context—not as isolated issues, but as parts of a whole system. The hermeneutic circle teaches us that true understanding comes from moving between the specific (individual alerts) and the general (project architecture, operational context, security posture).
 
 ## Activation
 
@@ -20,9 +24,72 @@ This skill activates when:
 /fix-gas
 ```
 
+## The Hermeneutic Approach to Security Alerts
+
+Before diving into technical fixes, Claude must apply the hermeneutic circle—moving between the parts (individual alerts) and the whole (project context) to achieve true understanding.
+
+### Step 1: Gather Project Context (The Whole)
+
+Before examining any individual alert, understand the project's nature:
+
+1. **Locate and read context files:**
+   - `CLAUDE.md` - Project-specific guidance for Claude
+   - `README.md` - Project overview and purpose
+   - `SECURITY.md` - Security policies and practices
+   - `.github/CODEOWNERS` - Responsibility structure
+   - `package.json` or equivalent - Dependencies and scripts
+
+2. **Understand the project's domain:**
+   - Is this a library, application, or tool?
+   - What are its security boundaries?
+   - Who are the users (internal developers, public consumers)?
+   - What data does it handle?
+
+3. **Identify operational constraints:**
+   - Performance requirements
+   - Backwards compatibility needs
+   - Deployment environment
+   - Regulatory compliance requirements
+
+### Step 2: Examine the Alert (The Part)
+
+For each security alert:
+
+1. **Read the full alert context:**
+   - What vulnerability type is identified?
+   - What is the attack vector?
+   - What is the potential impact?
+
+2. **Locate the code in question:**
+   - Read the surrounding code (not just the flagged line)
+   - Understand the function's purpose
+   - Trace data flow through the system
+   - Identify all callers and dependencies
+
+3. **Evaluate the alert's validity:**
+   - Is the vulnerable pattern actually reachable?
+   - Are there existing mitigations elsewhere?
+   - Does the project's threat model include this risk?
+
+### Step 3: Synthesize Understanding (The Circle)
+
+Move between the specific alert and project context to determine the appropriate response:
+
+1. **Consider architectural implications:**
+   - Would the suggested fix break existing patterns?
+   - Does the vulnerability exist elsewhere in similar code?
+   - Should the entire approach be reconsidered?
+
+2. **Evaluate fix strategies:**
+   - **Direct fix**: Apply the suggested remediation
+   - **Contextual fix**: Modify the suggestion for project patterns
+   - **Refactor**: Eliminate the vulnerable pattern entirely
+   - **Dismiss**: Document why the alert doesn't apply
+   - **Compensating controls**: Add validation/sanitization elsewhere
+
 ## Core Workflow
 
-Claude will execute these steps automatically:
+With the hermeneutic understanding established, Claude will execute these steps:
 
 ### 1. DETECT - Gather Alert Data
 ```bash
@@ -324,7 +391,24 @@ Track and optimize for:
 - Time to resolution (<5 min average)
 - False positive identification (>90% accuracy)
 - User intervention rate (<10%)
+- Context understanding depth (alerts evaluated within system whole)
+
+## Key Hermeneutic Principles
+
+Remember throughout the process:
+
+1. **Context First**: Never fix an alert without understanding its context within the whole system
+2. **The Circle**: Continuously move between the specific (alert) and general (architecture)
+3. **Emergent Understanding**: Allow insights to emerge from the interplay between parts and whole
+4. **Systemic Thinking**: Consider how fixes affect the entire system, not just the immediate code
+5. **Pragmatic Philosophy**: Apply Heidegger's hermeneutic circle in a practical, actionable way
+
+## Implementation Philosophy
+
+The goal is not to achieve zero alerts mechanically, but to achieve appropriate security through deep understanding. Each fix should emerge from comprehending the relationship between the code (part), its purpose (context), and its operational environment (whole).
+
+When in doubt, err on the side of understanding more context rather than applying fixes quickly. A well-understood dismissal based on system-wide analysis is better than a poorly-understood fix that breaks production systems.
 
 ---
 
-*This skill follows Anthropic's Claude Code best practices for automated security remediation.*
+*This skill applies Heidegger's hermeneutic circle to automated security remediation, following Anthropic's Claude Code best practices while maintaining philosophical depth.*
