@@ -1,196 +1,330 @@
-# Fixing GitHub Advanced Security Alerts: A Hermeneutic Approach
+# GitHub Advanced Security (GAS) Alert Fixer
+**Skill Version:** 1.0.0
+**Description:** Automatically analyze and fix GitHub Advanced Security alerts with context-aware solutions
 
-## Purpose
+## Activation
 
-This guide helps Claude sessions properly address GitHub Advanced Security (GAS) alerts by understanding them within their full context—not as isolated issues, but as parts of a whole system. The hermeneutic circle teaches us that true understanding comes from moving between the specific (individual alerts) and the general (project architecture, operational context, security posture).
+This skill activates when:
+- User invokes: `/fix-gas [PR_NUMBER]`
+- User says: "fix security alerts" or "handle GAS alerts"
+- A PR contains GitHub Advanced Security comments
+- User runs: `skill: gas`
 
-## Understanding view-pr-gas.sh
+## Quick Start
 
-The `view-pr-gas.sh` script extracts security alerts from a GitHub pull request, providing structured information about potential vulnerabilities. It outputs:
+```bash
+# Analyze and fix all security alerts in PR #123
+/fix-gas 123
 
+# Analyze current PR (when in PR branch)
+/fix-gas
+```
+
+## Core Workflow
+
+Claude will execute these steps automatically:
+
+### 1. DETECT - Gather Alert Data
+```bash
+# Run the detection script
+./skills/gas/scripts/view-pr-gas.sh [PR_NUMBER]
+
+# Parse output for:
 - Alert severity levels
-- Specific code locations (file paths and line numbers)
-- Vulnerability descriptions
-- Suggested remediation steps
-- CVE/CWE identifiers when applicable
-- Alert state (open, dismissed, fixed)
-
-## The Hermeneutic Approach to Security Alerts
-
-### Step 1: Gather Project Context (The Whole)
-
-Before examining any individual alert, understand the project's nature:
-
-1. **Locate and read context files:**
-   - `CLAUDE.md` - Project-specific guidance for Claude
-   - `README.md` - Project overview and purpose
-   - `SECURITY.md` - Security policies and practices
-   - `.github/CODEOWNERS` - Responsibility structure
-   - `package.json` or equivalent - Dependencies and scripts
-
-2. **Understand the project's domain:**
-   - Is this a library, application, or tool?
-   - What are its security boundaries?
-   - Who are the users (internal developers, public consumers)?
-   - What data does it handle?
-
-3. **Identify operational constraints:**
-   - Performance requirements
-   - Backwards compatibility needs
-   - Deployment environment
-   - Regulatory compliance requirements
-
-### Step 2: Examine the Alert (The Part)
-
-For each security alert:
-
-1. **Read the full alert context:**
-   - What vulnerability type is identified?
-   - What is the attack vector?
-   - What is the potential impact?
-
-2. **Locate the code in question:**
-   - Read the surrounding code (not just the flagged line)
-   - Understand the function's purpose
-   - Trace data flow through the system
-   - Identify all callers and dependencies
-
-3. **Evaluate the alert's validity:**
-   - Is the vulnerable pattern actually reachable?
-   - Are there existing mitigations elsewhere?
-   - Does the project's threat model include this risk?
-
-### Step 3: Synthesize Understanding (The Circle)
-
-Move between the specific alert and project context to determine the appropriate response:
-
-1. **Consider architectural implications:**
-   - Would the suggested fix break existing patterns?
-   - Does the vulnerability exist elsewhere in similar code?
-   - Should the entire approach be reconsidered?
-
-2. **Evaluate fix strategies:**
-   - **Direct fix**: Apply the suggested remediation
-   - **Contextual fix**: Modify the suggestion for project patterns
-   - **Refactor**: Eliminate the vulnerable pattern entirely
-   - **Dismiss**: Document why the alert doesn't apply
-   - **Compensating controls**: Add validation/sanitization elsewhere
-
-### Step 4: Implementation Guidance
-
-## Practical Workflow for Claude Sessions
-
-### Initial Setup
-
-```
-1. Run view-pr-gas.sh to get the alert data
-2. Read CLAUDE.md and other context files
-3. Use the nodejs-principal agent (or create a custom agent if the project uses a different language/framework)
-4. Create a systematic plan for addressing alerts
+- File locations and line numbers
+- Vulnerability types
+- CVE/CWE identifiers
 ```
 
-### For Each Alert Type
+### 2. ANALYZE - Context Assessment
+```
+For each alert, Claude will:
+1. Read the affected file completely
+2. Trace data flow (3 levels up/down from alert)
+3. Check for existing mitigations
+4. Identify similar patterns in codebase
+5. Assess production reachability
+```
 
-#### Input Validation Issues
-- Understand what data sources feed into the code
-- Check if validation happens at system boundaries
-- Consider the trust level of data sources
-- Prefer allowlist over denylist validation
+### 3. FIX - Apply Targeted Solutions
 
-#### Injection Vulnerabilities
-- Trace user input through the entire flow
-- Check for existing parameterization/escaping
-- Understand the execution context
-- Consider using safer APIs that prevent injection by design
+#### Decision Matrix
+```
+┌─────────────────────────┬──────────────────┬─────────────────┐
+│ Alert Type              │ Auto-Fix?        │ Action          │
+├─────────────────────────┼──────────────────┼─────────────────┤
+│ Incomplete escaping     │ Yes              │ Apply regex fix │
+│ SQL injection           │ Yes              │ Parameterize    │
+│ Path traversal          │ Yes              │ Sanitize input  │
+│ Insecure temp files     │ Yes              │ Use mkdtemp     │
+│ Race conditions         │ Conditional      │ Atomic ops      │
+│ Network validation      │ Conditional      │ Add validation  │
+│ Dependency CVEs         │ No (notify)      │ Document risk   │
+│ Custom/Unknown          │ No (escalate)    │ Ask user        │
+└─────────────────────────┴──────────────────┴─────────────────┘
+```
 
-#### Dependency Vulnerabilities
-- Check if the vulnerable functionality is actually used
-- Evaluate upgrade impact on the system
-- Consider pinning vs. range dependencies
-- Document any accepted risks
+### 4. VALIDATE - Ensure Correctness
+```bash
+# After each fix:
+npm test -- --testPathPattern=[affected_file]
+npm run lint [affected_file]
+git diff [affected_file]  # Review changes
+```
 
-#### Access Control Issues
-- Understand the authentication/authorization model
-- Check for defense in depth
-- Evaluate the principle of least privilege
-- Consider fail-secure defaults
+### 5. REPORT - Document Changes
+Generate structured output:
+```markdown
+## Security Fixes Applied - PR #[NUMBER]
 
-### Decision Framework
+### Summary
+- Fixed: X alerts
+- Dismissed: Y alerts
+- Escalated: Z alerts
+- Runtime impact: [MINIMAL|MODERATE|SIGNIFICANT]
 
-When evaluating whether to apply, modify, or dismiss an alert:
+### Details
+[For each alert: fix applied, rationale, verification]
+```
 
-**Apply the fix when:**
-- The vulnerability is clearly exploitable
-- The fix aligns with project patterns
-- No architectural changes are required
-- Tests can verify the fix doesn't break functionality
+## Alert-Specific Patterns
 
-**Modify the fix when:**
-- The project has established patterns for similar issues
-- The suggested fix would violate project conventions
-- A more comprehensive solution addresses multiple alerts
-- Performance or compatibility constraints exist
+### Incomplete String Escaping
+**Detection:** `.replace('pattern', 'replacement')` with single occurrence
+**Fix Pattern:**
+```javascript
+// Before
+str.replace('*', '.*')
+str.replace('%40', '@')
 
-**Dismiss the alert when:**
-- The code is unreachable in production
-- Compensating controls fully mitigate the risk
-- The alert is a false positive (with clear documentation)
-- The risk is explicitly accepted in the threat model
+// After
+str.replace(/\*/g, '.*')
+str.replace(/%40/g, '@')
+```
+**Validation:** Ensure all occurrences are replaced
 
-**Refactor the code when:**
-- The vulnerable pattern appears multiple times
-- A design change eliminates entire classes of vulnerabilities
-- The current approach violates security principles
-- Modern alternatives provide inherent safety
+### SQL Injection
+**Detection:** String concatenation in SQL queries
+**Fix Pattern:**
+```javascript
+// Before
+db.query(`SELECT * FROM users WHERE id = ${userId}`)
 
-## Agent Selection
+// After
+db.query('SELECT * FROM users WHERE id = ?', [userId])
+```
+**Validation:** No user input in query strings
 
-**Recommended: nodejs-principal agent**
-- Best for JavaScript/TypeScript projects
-- Understands npm ecosystem security patterns
-- Familiar with common Node.js vulnerabilities
+### Path Traversal
+**Detection:** Unvalidated file paths from user input
+**Fix Pattern:**
+```javascript
+// Before
+fs.readFile(userPath)
 
-**When to create a custom agent:**
-- Non-JavaScript languages require different expertise
-- Specialized security frameworks are in use
-- Domain-specific security requirements exist
-- Compliance standards dictate specific approaches
+// After
+const safePath = path.resolve(baseDir, path.normalize(userPath))
+if (!safePath.startsWith(baseDir)) {
+  throw new Error('Invalid path')
+}
+fs.readFile(safePath)
+```
+**Validation:** Paths confined to safe directory
 
-## Implementation Checklist
+### Insecure Temporary Files
+**Detection:** Predictable temp file names
+**Fix Pattern:**
+```javascript
+// Before
+const tempFile = '/tmp/data.json'
 
-For each Claude session addressing GAS alerts:
+// After
+import { mkdtempSync } from 'fs'
+import { tmpdir } from 'os'
+const tempDir = mkdtempSync(path.join(tmpdir(), 'app-'))
+const tempFile = path.join(tempDir, 'data.json')
+```
+**Validation:** Unique, unpredictable paths
 
-- [ ] Gather full project context before starting
-- [ ] Read and understand each alert completely
-- [ ] Trace code paths and data flows
-- [ ] Consider architectural implications
-- [ ] Choose appropriate fix strategy
-- [ ] Implement with project patterns in mind
-- [ ] Test fixes don't break functionality
-- [ ] Document any dismissed alerts
-- [ ] Look for similar patterns to fix proactively
-- [ ] Update documentation if patterns change
+## Tool Orchestration
 
-## Key Principles
+Claude will use these tool sequences:
 
-1. **Context First**: Never fix an alert without understanding its context
-2. **Systemic Thinking**: Consider how fixes affect the whole system
-3. **Pragmatic Security**: Balance security with operational needs
-4. **Documentation**: Record why decisions were made
-5. **Proactive Improvement**: Use alerts to improve overall security posture
+### For Analysis Phase
+```yaml
+sequence:
+  - Bash: Run view-pr-gas.sh
+  - Read: Get full file content
+  - Grep: Find similar patterns
+  - Read: Check test files
+```
 
-## Common Pitfalls to Avoid
+### For Fix Phase
+```yaml
+sequence:
+  - Edit: Apply security fix
+  - Bash: Run affected tests
+  - If tests fail:
+    - Edit: Revert changes
+    - AskUserQuestion: Get guidance
+```
 
-- Applying fixes that break core functionality
-- Ignoring project conventions for "perfect" security
-- Dismissing alerts without proper investigation
-- Creating fixes that degrade performance unnecessarily
-- Introducing new vulnerabilities while fixing others
-- Failing to check for similar issues elsewhere
-- Not considering the maintenance burden of fixes
+### For Validation Phase
+```yaml
+sequence:
+  - Bash: npm test
+  - Bash: npm run lint
+  - Bash: Check for breaking changes
+  - If all pass:
+    - Bash: git add [files]
+    - Bash: git commit -m "fix: [alert_type]"
+```
 
-## Remember
+## Error Recovery
 
-The goal is not to achieve zero alerts, but to achieve appropriate security for the project's context. Each fix should make the system more secure while maintaining its ability to fulfill its purpose. The hermeneutic circle reminds us that security is not absolute—it exists within the relationship between the code, its purpose, and its operational environment.
+### When Automated Fix Fails
+1. Revert the attempted fix
+2. Document why it failed
+3. Create a manual fix suggestion
+4. Ask user for guidance with context
 
-When in doubt, err on the side of understanding more context rather than applying fixes quickly. A well-understood dismissal is better than a poorly-understood fix that breaks production systems.
+### When Tests Break
+1. Check if test assumptions changed
+2. Update tests if security fix is correct
+3. Otherwise, revert and escalate
+
+### When PR Too Large (>50 alerts)
+1. Process in batches of 10
+2. Commit after each batch
+3. Run full test suite between batches
+
+## Examples
+
+### Example 1: String Escaping Fix
+```javascript
+// Alert: Incomplete string escaping in run/alf3/lib/utils.js:42
+
+// Original code
+const pattern = userInput.replace('*', '.*')
+
+// Fixed code
+const pattern = userInput.replace(/\*/g, '.*')
+
+// Commit message
+fix(security): use global regex replacement to prevent injection
+
+Replaces single-occurrence string replacement with global regex
+to ensure all instances are properly escaped.
+
+Fixes: github-advanced-security[bot] alert #1
+```
+
+### Example 2: Dismissal with Justification
+```javascript
+// Alert: Potential SQL injection in src/db/query.js:89
+
+// Analysis shows:
+// 1. Input is from internal config file
+// 2. No user input reaches this code
+// 3. Additional validation at API boundary
+
+// Action: Dismiss with comment
+"This alert is a false positive. The value comes from a
+trusted internal configuration file with no user input path.
+Additionally, input validation occurs at the API boundary
+in src/api/middleware/validate.js:34"
+```
+
+## Performance Targets
+
+- Single alert: < 10 seconds
+- 10 alerts: < 60 seconds
+- 50 alerts: < 5 minutes
+- Include test validation time
+
+## Integration Points
+
+### CI/CD Pipeline
+```yaml
+on: [pull_request]
+jobs:
+  fix-security:
+    steps:
+      - uses: anthropics/claude-code@v1
+      - run: claude-code skill:gas
+```
+
+### Git Hooks
+```bash
+# .git/hooks/pre-push
+claude-code skill:gas --check-only
+```
+
+### PR Comment Automation
+```javascript
+// After fixes applied
+gh pr comment $PR --body "$(claude-code skill:gas --summary)"
+```
+
+## Skill Configuration
+
+### Required Files
+- `skills/gas/scripts/view-pr-gas.sh` - Alert detection script
+- Project must have `package.json` or language-specific manifest
+- Git repository with GitHub remote
+
+### Environment Variables
+```bash
+GITHUB_TOKEN    # For API access
+GAS_AUTO_FIX    # true|false (default: true)
+GAS_BATCH_SIZE  # Number of alerts per commit (default: 10)
+GAS_TEST_TIMEOUT # Ms to wait for tests (default: 30000)
+```
+
+## Safety Constraints
+
+1. **Never auto-fix without tests passing**
+2. **Always preserve functionality** - security fixes must not break features
+3. **Document every dismissal** with clear justification
+4. **Escalate architectural issues** that require design changes
+5. **Maintain audit trail** in git history
+
+## Escape Hatches
+
+When Claude encounters:
+- Unknown alert types → Ask user for example fix
+- Conflicting fixes → Show options, let user choose
+- Breaking changes → Explain impact, await approval
+- Missing context → Request additional files/info
+
+## Usage Examples
+
+```bash
+# Fix all alerts in PR 123
+/fix-gas 123
+
+# Check alerts without fixing (dry run)
+/fix-gas 123 --dry-run
+
+# Fix only high-severity alerts
+/fix-gas 123 --severity=high
+
+# Generate report only
+/fix-gas 123 --report-only
+
+# Fix with custom commit message prefix
+/fix-gas 123 --commit-prefix="security:"
+```
+
+## Success Metrics
+
+Track and optimize for:
+- Fix accuracy rate (>95%)
+- Test pass rate after fixes (>99%)
+- Time to resolution (<5 min average)
+- False positive identification (>90% accuracy)
+- User intervention rate (<10%)
+
+---
+
+*This skill follows Anthropic's Claude Code best practices for automated security remediation.*
