@@ -140,4 +140,5 @@ vite.config.ts.timestamp-*
 
 # Claude
 .claude/
+!vlurp/**/.claude/
 CLAUDE.md
