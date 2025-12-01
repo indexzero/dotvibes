@@ -1,0 +1,36 @@
+# .vlurpfile - Commands to recreate ./vlurp contents
+# Run with: cat .vlurpfile | grep -v '^#' | grep -v '^$' | xargs -I {} sh -c '{}'
+
+# Repos with .claude/** structure (default filter works)
+vlurp eyaltoledano/claude-task-master -d ./vlurp
+vlurp sjennings/cc-management -d ./vlurp
+
+# Repos with claude/ (not .claude/) structure
+vlurp akshay-greenlang/Code-V1_GreenLang -d ./vlurp --filter "claude/**"
+vlurp KingInYellow18/claudeagents -d ./vlurp --filter "claude/**"
+
+# Repos with agents/ at root
+vlurp iannuttall/claude-agents -d ./vlurp --filter "agents/**"
+vlurp wshobson/agents -d ./vlurp --filter "**/*.md"
+vlurp tyrchen/dotclaude -d ./vlurp --filter "**/*.md"
+
+# Repos with all markdown structure
+vlurp aliafshar/brain -d ./vlurp --filter "*.md"
+vlurp aref-vc/claude-agents -d ./vlurp --filter "**/*.md"
+vlurp vijaythecoder/awesome-claude-agents -d ./vlurp --filter "**/*.md"
+
+# Repos with commands/ structure
+vlurp joenandez/slashflow -d ./vlurp --filter "commands/**"
+
+# Repos with custom/special structure
+vlurp rstacruz/spec-mode-prompt -d ./vlurp --filter "**/*.md" --filter "**/*.sh"
+vlurp microsoft/amplifier -d ./vlurp --filter "**/*.md"
+
+# Curated lists (README only)
+vlurp rahulvrane/awesome-claude-agents -d ./vlurp --filter "README.md"
+vlurp VoltAgent/awesome-claude-code-subagents -d ./vlurp --filter "*.md"
+
+# DuckDB agents/skills
+vlurp provectus/awos-data-engineering-showroom -d ./vlurp --filter ".claude/**" --filter ".awos/**" # aa5fc8e
+vlurp Telnamix-Official/nextjs-supabase-template -d ./vlurp --filter ".claude/**" # fe9857f
+vlurp whilp/dotfiles -d ./vlurp --filter ".claude/skills/duckdb-json/**" --filter ".claude/skills/gh-workflow/**" --filter ".claude/skills/ghostty/**" --filter ".claude/skills/hammerspoon/**" # 6fc9349
