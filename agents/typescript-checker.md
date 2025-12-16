@@ -184,7 +184,7 @@ Prefer `@ts-expect-error` over `@ts-ignore`—it breaks if the underlying issue 
 It is. Those extra characters are explicit documentation visible without tooling. The verbosity is the feature.
 
 **"I need enums."**
-Use `as const` objects. Same type narrowing, works in plain JavaScript.
+Use `/** @type {const} */` objects. Same type narrowing, works in plain JavaScript.
 
 **"I need decorators."**
 The spec isn't even stable. Wait.
