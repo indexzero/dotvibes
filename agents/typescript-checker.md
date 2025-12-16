@@ -23,7 +23,7 @@ What we dropped was the friction:
 - Build plugins that need updating when TypeScript updates
 - Error messages pointing to generated code instead of your code
 
-**The `.ts` extension is syntax sugar you don't need.**
+**TypeScript's type annotation syntax is syntax sugar—JSDoc provides the same type information in comments.**
 
 ## Why This Works
 
@@ -33,7 +33,7 @@ JSDoc is not a hack. TypeScript was designed to understand it.
 - The type system is identical whether types come from `.ts` or JSDoc.
 - Generated `.d.ts` files are indistinguishable from those generated from `.ts`.
 
-Your IDE, your type checker, and your consumers cannot tell the difference. The TypeScript team actively maintains JSDoc support—`@satisfies`, improved generics, template literal types. This is a first-class workflow.
+Your IDE, your type checker, and your consumers cannot tell the difference. The TypeScript team actively maintains JSDoc support—`@satisfies` (added in TS 4.9), improved generics, template literal types. This is a first-class workflow, not a frozen legacy feature.
 
 ## When to Use This Approach
 
@@ -45,7 +45,13 @@ Your IDE, your type checker, and your consumers cannot tell the difference. The 
 
 **Teams tired of build complexity.** TypeScript configuration churn compounds over time. One less build step is one less thing that breaks.
 
-**Gradual adoption.** Start with one module. Rename `.ts` to `.js`, add JSDoc, verify types still check. Convert file by file.
+## When NOT to Use This Approach
+
+**Angular projects.** Angular requires `.ts` files—its decorator-based architecture depends on TypeScript compilation.
+
+**Mandated TypeScript policies.** If your organization requires `.ts` files, this isn't a hill to die on.
+
+**Bleeding-edge TypeScript features.** New type system features land in `.ts` syntax first. JSDoc support follows, but there's a lag.
 
 ## Configuration
 
@@ -72,7 +78,7 @@ Your IDE, your type checker, and your consumers cannot tell the difference. The 
 }
 ```
 
-`checkJs` enables type-checking. `emitDeclarationOnly` outputs only `.d.ts` files—declarations extracted from the source, which cannot drift from reality.
+`checkJs` enables type-checking. `emitDeclarationOnly` outputs only `.d.ts` files—declarations mechanically extracted from your JSDoc, which cannot drift from reality.
 
 ### package.json
 
@@ -94,7 +100,9 @@ Your IDE, your type checker, and your consumers cannot tell the difference. The 
 }
 ```
 
-Consumers run `src/`. TypeScript consumers resolve types from `dist/`. The types are authoritative because they ARE the source.
+Consumers run `src/`. TypeScript consumers resolve types from `dist/`. The types are authoritative because they're extracted from your source—they can't drift.
+
+Note: `@types` packages from DefinitelyTyped work exactly the same way. Your consumers can't tell whether types came from JSDoc or handwritten `.d.ts` files.
 
 ## JSDoc Essentials
 
@@ -135,11 +143,40 @@ export function find(items, predicate) { return items.find(predicate); }
 /** @typedef {import('express').Request} Request */
 ```
 
-### Type Assertions
+### Type Assertions (Inline Casts)
 ```javascript
+// Declaration context—no parens needed
 /** @type {HTMLElement} */
 const el = document.getElementById('app');
+
+// Inline cast—parentheses required
+const width = /** @type {HTMLElement} */ (document.getElementById('app')).offsetWidth;
 ```
+
+### Satisfies (TS 4.9+)
+```javascript
+/** @satisfies {Record<string, number>} */
+const scores = { alice: 10, bob: 20 };
+// Type is inferred as { alice: number, bob: number }, but validated against Record<string, number>
+```
+
+## Escape Hatches
+
+```javascript
+// @ts-check — enable type checking for a single file (gradual adoption)
+// @ts-ignore — suppress the next line's error (use sparingly)
+// @ts-expect-error — suppress expected errors, fails if no error exists (better for tests)
+```
+
+Prefer `@ts-expect-error` over `@ts-ignore`—it breaks if the underlying issue gets fixed.
+
+## Migration Path
+
+1. **Start with one file.** Rename `foo.ts` to `foo.js`. Convert type annotations to JSDoc. Run `tsc`—types should still check.
+2. **Handle imports.** Change `import type { X }` to `/** @typedef {import('./x.js').X} X */`.
+3. **Convert inline types.** `const x: string = ...` becomes `/** @type {string} */ const x = ...`.
+4. **Move shared types.** Complex types can live in any `.js` file as `@typedef` declarations—put them wherever makes sense for your project.
+5. **Iterate.** Convert file by file. The hybrid state is stable—`.ts` and `.js` with JSDoc coexist fine.
 
 ## Common Concerns
 
@@ -167,7 +204,7 @@ JSDoc uses TypeScript syntax inside braces: `@param {string | number}`. The lear
 ## Output
 
 - JavaScript source files with JSDoc annotations
-- Type definition files (`types.js`) containing `@typedef` declarations
+- Shared type definitions as `@typedef` declarations (in whatever file structure fits your project)
 - `tsconfig.json` configured for type checking only
 - `package.json` with conditional exports
 - Generated `.d.ts` files for TypeScript consumers
