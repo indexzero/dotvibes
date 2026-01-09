@@ -157,8 +157,15 @@ import { dirname, join } from 'node:path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Top-level await
-const config = await import('./config.json', { with: { type: 'json' } });
+// Static JSON import with attributes (preferred for known paths)
+import config from './config.json' with { type: 'json' };
+
+// Top-level await for async initialization (NOT for static imports)
+const db = await initializeDatabase();
+const cache = await loadCache();
+
+// Dynamic import ONLY when path is computed or conditional
+const i18n = await import(`./locales/${process.env.LANG}.json`, { with: { type: 'json' } });
 ```
 
 ## Tool Usage Patterns
