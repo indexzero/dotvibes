@@ -1,0 +1,74 @@
+# skills.vlurpfile - Claude Skills repositories
+# Run with: cat skills.vlurpfile | grep -v '^#' | grep -v '^$' | xargs -I {} sh -c '{}'
+
+# ============================================================================
+# OFFICIAL ANTHROPIC
+# ============================================================================
+
+# anthropics/skills - Official skills repo (29.6k stars)
+# Document skills (docx, pdf, pptx, xlsx), creative skills (algorithmic-art,
+# canvas-design), enterprise skills (brand-guidelines, internal-comms),
+# and technical skills (mcp-builder, webapp-testing)
+vlurp anthropics/skills -d ./vlurp --filter "skills/**" --filter "template/**" --filter "spec/**"
+
+# ============================================================================
+# OBRA/SUPERPOWERS ECOSYSTEM (Jesse Vincent)
+# ============================================================================
+
+# obra/superpowers - Core skills library (20+ battle-tested skills)
+# TDD, systematic-debugging, verification-before-completion, 
+# subagent-driven-development, brainstorm/write-plan/execute-plan workflow
+vlurp obra/superpowers -d ./vlurp --filter "skills/**" --filter ".claude/**"
+
+# obra/superpowers-skills - Community-editable skills
+vlurp obra/superpowers-skills -d ./vlurp --filter "skills/**" --filter "**/*.md"
+
+# obra/superpowers-lab - Experimental skills (tmux interactive commands, etc)
+vlurp obra/superpowers-lab -d ./vlurp --filter "skills/**" --filter "**/*.md"
+
+# obra/superpowers-developing-for-claude-code - Plugin/skill development
+# 42 official documentation files, plugin development workflows
+vlurp obra/superpowers-developing-for-claude-code -d ./vlurp --filter "skills/**" --filter "**/*.md"
+
+# obra/superpowers-marketplace - Curated plugin marketplace config
+vlurp obra/superpowers-marketplace -d ./vlurp --filter "**/*.md" --filter ".claude-plugin/**"
+
+# obra/the-elements-of-style - Writing guidance skill (Strunk & White)
+vlurp obra/the-elements-of-style -d ./vlurp --filter "skills/**" --filter "**/*.md"
+
+# ============================================================================
+# AWESOME LISTS / CURATED COLLECTIONS
+# ============================================================================
+
+# travisvn/awesome-claude-skills - Well-organized curated list
+# Includes timeline, FAQ, security notes, categorized skills
+vlurp travisvn/awesome-claude-skills -d ./vlurp --filter "*.md"
+
+# VoltAgent/awesome-claude-skills - Another curated collection
+vlurp VoltAgent/awesome-claude-skills -d ./vlurp --filter "*.md"
+
+# ComposioHQ/awesome-claude-skills - 50+ skills collection
+# Includes forensics, git automation, test-fixing, threat-hunting
+vlurp ComposioHQ/awesome-claude-skills -d ./vlurp --filter "*.md"
+
+# ============================================================================
+# SNAPSHOTS / ARCHIVES
+# ============================================================================
+
+# simonw/claude-skills - Snapshot of /mnt/skills from Claude environment
+# Useful historical reference of built-in skills
+vlurp simonw/claude-skills -d ./vlurp --filter "**/*.md" --filter "**/*.py" --filter "**/*.sh"
+
+# ============================================================================
+# PARTNER / THIRD-PARTY SKILLS
+# ============================================================================
+
+# notiondevs/Notion Skills for Claude (if public repo exists)
+# vlurp notiondevs/notion-skills-claude -d ./vlurp --filter "**/*.md"
+
+# ============================================================================
+# SPECIALIZED SKILL REPOS
+# ============================================================================
+
+# brunoasm/my_claude_skills - Anti-confirmation bias skill, PDF extraction
+vlurp brunoasm/my_claude_skills -d ./vlurp --filter "**/*.md" --filter "skills/**"
