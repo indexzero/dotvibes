@@ -142,3 +142,4 @@ vite.config.ts.timestamp-*
 .claude/
 !vlurp/**/.claude/
 CLAUDE.md
+claude-sessions-export/
