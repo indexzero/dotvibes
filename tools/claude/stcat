@@ -1,0 +1,82 @@
+#!/bin/bash
+# stcat - Sequential Thinking Cat
+# Extract and format sequential thinking thoughts from Claude session JSONL files
+
+set -e
+
+usage() {
+  echo "Usage: stcat [options] <file.jsonl>"
+  echo ""
+  echo "Extract sequential thinking thoughts from Claude session JSONL files"
+  echo ""
+  echo "Options:"
+  echo "  -t, --timestamps   Include timestamps in output"
+  echo "  -n, --no-separator Omit separators between thoughts"
+  echo "  -j, --json         Output as JSON instead of formatted text"
+  echo "  -h, --help         Show this help message"
+  echo ""
+  echo "Examples:"
+  echo "  stcat session.jsonl"
+  echo "  stcat -t ~/.claude/projects/.../session.jsonl"
+  echo "  stcat --json session.jsonl | jq '.thought'"
+  exit 1
+}
+
+TIMESTAMPS=false
+SEPARATORS=true
+JSON=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -t|--timestamps)
+      TIMESTAMPS=true
+      shift
+      ;;
+    -n|--no-separator)
+      SEPARATORS=false
+      shift
+      ;;
+    -j|--json)
+      JSON=true
+      shift
+      ;;
+    -h|--help)
+      usage
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage
+      ;;
+    *)
+      FILE="$1"
+      shift
+      ;;
+  esac
+done
+
+if [[ -z "$FILE" ]]; then
+  echo "Error: No file specified" >&2
+  usage
+fi
+
+if [[ ! -f "$FILE" ]]; then
+  echo "Error: File not found: $FILE" >&2
+  exit 1
+fi
+
+if ! command -v jq &> /dev/null; then
+  echo "Error: jq is required but not installed" >&2
+  exit 1
+fi
+
+if [[ "$JSON" == "true" ]]; then
+  jq -c 'select(.message.content | type == "array") | . as $msg | .message.content[] | select(.input.thought) | {thoughtNumber: .input.thoughtNumber, totalThoughts: .input.totalThoughts, thought: .input.thought, timestamp: $msg.timestamp}' "$FILE"
+elif [[ "$TIMESTAMPS" == "true" && "$SEPARATORS" == "true" ]]; then
+  jq -r 'select(.message.content | type == "array") | . as $msg | .message.content[] | select(.input.thought) | .input | "\n═══════════════════════════════════════════════════════════════════════════════\n## Thought \(.thoughtNumber)/\(.totalThoughts) [\($msg.timestamp // "no timestamp")]\n═══════════════════════════════════════════════════════════════════════════════\n\n\(.thought)"' "$FILE"
+elif [[ "$TIMESTAMPS" == "true" && "$SEPARATORS" == "false" ]]; then
+  jq -r 'select(.message.content | type == "array") | . as $msg | .message.content[] | select(.input.thought) | .input | "## Thought \(.thoughtNumber)/\(.totalThoughts) [\($msg.timestamp // "no timestamp")]\n\n\(.thought)\n"' "$FILE"
+elif [[ "$SEPARATORS" == "true" ]]; then
+  jq -r 'select(.message.content | type == "array") | .message.content[] | select(.input.thought) | .input | "\n═══════════════════════════════════════════════════════════════════════════════\n## Thought \(.thoughtNumber)/\(.totalThoughts)\n═══════════════════════════════════════════════════════════════════════════════\n\n\(.thought)"' "$FILE"
+else
+  jq -r 'select(.message.content | type == "array") | .message.content[] | select(.input.thought) | .input | "## Thought \(.thoughtNumber)/\(.totalThoughts)\n\n\(.thought)\n"' "$FILE"
+fi
